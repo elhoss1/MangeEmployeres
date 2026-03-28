@@ -101,4 +101,16 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();  // 🔥 ينشئ القاعدة والجداول من جديد
 }
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+app.UseCors("AllowAll");
+
 app.Run();
+
