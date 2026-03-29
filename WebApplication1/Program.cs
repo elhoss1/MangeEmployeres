@@ -7,6 +7,11 @@ using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(8080);
+});
+
 // 🔹 Controllers
 builder.Services.AddControllers();
 
@@ -85,7 +90,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication(); // 🔐 مهم جدًا
 app.UseAuthorization();
@@ -98,7 +103,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureDeleted();  // 🔥 يمسح القاعدة القديمة
-    db.Database.EnsureCreated();  // 🔥 ينشئ القاعدة والجداول من جديد
+    //db.Database.EnsureCreated();  // 🔥 ينشئ القاعدة والجداول من جديد
 }
 
 builder.Services.AddCors(options =>
