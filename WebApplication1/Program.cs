@@ -7,9 +7,11 @@ using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+
+builder.WebHost.ConfigureKestrel(options =>
 {
-    serverOptions.ListenAnyIP(8080);
+    options.ListenAnyIP(int.Parse(port));
 });
 
 // 🔹 Controllers
@@ -90,7 +92,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication(); // 🔐 مهم جدًا
 app.UseAuthorization();
