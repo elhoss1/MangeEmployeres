@@ -2,17 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
 using System.Text;
 using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+// ✅ تعيين ترخيص EPPlus (مطلوب من الإصدار 5 وما بعده)
+ExcelPackage.License.SetNonCommercialPersonal("Hossam");
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(int.Parse(port));
-});
 
 // 🔹 Controllers
 builder.Services.AddControllers();
@@ -21,7 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-// 🔹 JWT Key (لازم تبقى 32 حرف على الأقل)
+// 🔹 JWT Key
 var key = Encoding.UTF8.GetBytes("THIS_IS_A_SUPER_SECRET_KEY_123456789");
 
 // 🔹 Authentication
@@ -32,7 +30,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // عشان Swagger
+    options.RequireHttpsMetadata = false;
     options.SaveToken = true;
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -46,7 +44,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 🔹 Swagger + JWT Support
+// 🔹 Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -56,7 +54,6 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    // 🔐 إضافة JWT في Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -83,31 +80,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-var app = builder.Build();
-
-// 🔹 Middleware
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication(); // 🔐 مهم جدًا
-app.UseAuthorization();
-
-// 🔹 Endpoints
-app.MapControllers();
-
-// 🔹 إنشاء الداتابيز تلقائي (للتجربة فقط)
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureDeleted();  // 🔥 يمسح القاعدة القديمة
-    //db.Database.EnsureCreated();  // 🔥 ينشئ القاعدة والجداول من جديد
-}
-
+// 🔹 CORS (✅ لازم قبل Build)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -117,7 +90,32 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
+
+// ❗ Build بعد ما تخلص كل Services
+var app = builder.Build();
+
+
+// 🔹 Middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// تفعيل CORS
 app.UseCors("AllowAll");
 
-app.Run();
+app.UseAuthentication();
+app.UseAuthorization();
 
+// 🔹 Endpoints
+app.MapControllers();
+
+// 🔹 Database Init (اختياري)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated(); // ✅ خلي دي بدل EnsureDeleted
+}
+
+app.Run("http://localhost:5000");
