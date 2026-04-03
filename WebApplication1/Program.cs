@@ -8,9 +8,8 @@ using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ تعيين ترخيص EPPlus (مطلوب من الإصدار 5 وما بعده)
+// ✅ EPPlus License
 ExcelPackage.License.SetNonCommercialPersonal("Hossam");
-
 
 // 🔹 Controllers
 builder.Services.AddControllers();
@@ -80,7 +79,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 🔹 CORS (✅ لازم قبل Build)
+// 🔹 CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -90,10 +89,12 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-
-// ❗ Build بعد ما تخلص كل Services
+// ❗ Build
 var app = builder.Build();
 
+// ✅ أهم سطر لحل مشكلة Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+app.Urls.Add($"http://0.0.0.0:{port}");
 
 // 🔹 Middleware
 if (app.Environment.IsDevelopment())
@@ -102,20 +103,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// تفعيل CORS
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 🔹 Endpoints
 app.MapControllers();
 
-// 🔹 Database Init (اختياري)
+// 🔹 Database Init
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated(); // ✅ خلي دي بدل EnsureDeleted
+    db.Database.EnsureCreated();
 }
 
-app.Run("http://localhost:5000");
+// ❗ مهم: بدون localhost
+app.Run();
