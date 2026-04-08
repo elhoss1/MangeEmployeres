@@ -14,5 +14,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/WebApplication1/out .
 
-EXPOSE 8080
+# Environment variables
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+# Use PORT environment variable from Render
+ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
+EXPOSE ${PORT:-8080}
+
 ENTRYPOINT ["dotnet", "WebApplication1.dll"]
