@@ -15,8 +15,11 @@ ExcelPackage.License.SetNonCommercialPersonal("Hossam");
 builder.Services.AddControllers();
 
 // 🔹 DbContext
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
+                       ?? builder.Configuration.GetConnectionString("Default");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    options.UseNpgsql(connectionString));
 
 // 🔹 JWT Key
 var key = Encoding.UTF8.GetBytes("THIS_IS_A_SUPER_SECRET_KEY_123456789");
