@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-
 using WebApplication1.Models;
 
 namespace WebApplication1.Data
@@ -9,13 +7,16 @@ namespace WebApplication1.Data
     {
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<User> Users { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Payroll> Payrolls { get; set; }
+
+        // 🔥 الجديد
+        public DbSet<Leave> Leaves { get; set; }
+        public DbSet<Insurance> Insurances { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
-
-        public DbSet<Attendance> Attendances { get; set; }
-        public DbSet<Payroll> Payrolls { get; set; }
     }
 }

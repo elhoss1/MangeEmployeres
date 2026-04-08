@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 
 // 🔹 DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // 🔹 JWT Key
 var key = Encoding.UTF8.GetBytes("THIS_IS_A_SUPER_SECRET_KEY_123456789");
